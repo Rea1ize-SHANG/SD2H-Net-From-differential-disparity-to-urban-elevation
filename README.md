@@ -1,6 +1,6 @@
 # SD-H-Net-From-differential-disparity-to-urban-elevation
 
-We introduce the Stereo Differential Disparity to Height Estimation Network (SD$^{2}$H-Net), a pioneering end-to-end architecture that elegantly integrates classical differential parallax theory with deep learning paradigms.
+We introduce the Stereo Differential Disparity to Height Estimation Network (SD²H-Net), a pioneering end-to-end architecture that elegantly integrates classical differential parallax theory with deep learning paradigms.
 
 ## **How to use?**
 
