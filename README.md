@@ -38,6 +38,9 @@ We introduce the Stereo Differential Disparity to Height Estimation Network (SD$
     pip install rasterio
     ```
 
-### **Data Preparation**
-Download the **[WHU-Stereo Datasets](https://github.com/Sheng029/WHU-Stereo)**.
+## **Data Preparation**
+Download the **[WHU-Stereo Datasets](https://github.com/Sheng029/WHU-Stereo)** and **[GF7Stereo Datasets]()**.
+
+## **Appendix**
+Supplementary data to this article can be found online at [Supplementary Data Link].
 
