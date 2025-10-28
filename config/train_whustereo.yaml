@@ -1,0 +1,31 @@
+wandb: {}
+project_name: SDH
+restore_ckpt: null       #'/home/shangying/workspace/project/SDH-Net/checkpoints/final.pth'
+logdir: './checkpoints/whustereo/'
+encoder: 'vitb'              #vitb
+batch_size: 4
+train_datasets: ['whustereo']
+lr: 1e-4
+wdecay: 1e-4         #1e-5
+total_step: 100000      
+save_frequency: 2500      
+save_path: './checkpoints/whustereo/'
+val_frequency: 2500             #2500
+image_size: [1024, 1024]
+train_iters: 8       #21
+valid_iters: 8      #32
+val_dataset: 'whustereo'
+corr_implementation: "reg"
+corr_levels: 2
+corr_radius: 4
+n_downsample: 2    #2
+n_gru_layers: 3
+hidden_dims: [128, 128, 128]      
+max_disp: 64
+min_disp: -128
+saturation_range: [1.0, 1.0]      #[0.0, 1.4]
+do_flip: False
+spatial_scale: [1.0, 1.0]         #[-0.2, 0.4]
+noyjitter: True
+num_gpu: 4 #4
+seed: 666
