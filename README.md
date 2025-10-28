@@ -18,7 +18,6 @@ We introduce the Stereo Differential Disparity to Height Estimation Network (SDÂ
 
 2. Install dependencies:
     ```bash
-    pip install --upgrade pip setuptools
     pip install torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 --index-url https://download.pytorch.org/whl/cu117
     pip install tqdm 
     pip install scipy 
