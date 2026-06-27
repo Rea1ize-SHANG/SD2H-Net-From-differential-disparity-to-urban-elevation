@@ -14,6 +14,10 @@ The core idea is simple: instead of reconstructing a full DSM and subtracting a 
 
 ![Network](assets/fig4Network_01.png)
 
+The figure below illustrates representative UnifiedBH patches and the intermediate products used by SD2H-Net. From left to right, each row shows the original GF-7 patch, the same patch with all pre-filtering building-label contours overlaid in blue, the pre-trained stereo disparity map, and the final building-height prediction map.
+
+![UnifiedBH processing examples](assets/unifiedbh_process_grid.png)
+
 ## Repository Layout
 
 ```text
@@ -163,10 +167,6 @@ The default configs use the following cities:
 ```text
 HZ_049 HZ_050 HZ_057 HZ_DG_058 SZ_060 SZ_061 HK_062 SZ_DG_038 PRE_039
 ```
-
-The figure below illustrates representative UnifiedBH patches and the intermediate products used by SD2H-Net. From left to right, each row shows the original GF-7 patch, the same patch with all pre-filtering building-label contours overlaid in blue, the pre-trained stereo disparity map, and the final building-height prediction map.
-
-![UnifiedBH processing examples](assets/unifiedbh_process_grid.png)
 
 Update dataset paths in the height configs, for example:
 
