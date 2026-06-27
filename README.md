@@ -12,6 +12,8 @@ The core idea is simple: instead of reconstructing a full DSM and subtracting a 
 - Instance-level height calibration with building masks and weak labels.
 - Intra-city and cross-city evaluation protocols.
 
+![Network](assets/fig4Network_01.png)
+
 ## Repository Layout
 
 ```text
