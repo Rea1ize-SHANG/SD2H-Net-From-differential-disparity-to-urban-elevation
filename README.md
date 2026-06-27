@@ -448,15 +448,6 @@ before running on a new machine.
 
 If this repository is useful for your research, please cite the corresponding paper after publication.
 
-```bibtex
-@article{sd2hnet,
-  title   = {SD2H-Net: From Differential Disparity to Urban Elevation},
-  author  = {Shang, Y. and collaborators},
-  journal = {ISPRS Journal of Photogrammetry and Remote Sensing},
-  year    = {2026}
-}
-```
-
 ## Data Availability
 
 Download UnifiedBH and related resources from the project release page:
