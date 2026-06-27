@@ -100,7 +100,11 @@ checkpoints/
 
 ### WHU-SSIDE
 
-WHU-SSIDE is used for disparity pre-training and disparity evaluation. The expected structure is:
+WHU-SSIDE is used for disparity pre-training and disparity evaluation. This dataset is provided by the WHU-SSIDE authors; please download it from the official repository and follow their license and citation requirements:
+
+- WHU-SSIDE repository: [zhanggb1997/WHU-SSIDE](https://github.com/zhanggb1997/WHU-SSIDE)
+
+We thank the WHU-SSIDE authors for releasing this GF-7 satellite stereo benchmark. After downloading the dataset, organize it with the following structure:
 
 ```text
 WHU-SSIDE/
@@ -123,7 +127,12 @@ val_data_path: /path/to/WHU-SSIDE/valtest
 
 ### UnifiedBH
 
-UnifiedBH is used for building height adaptation and evaluation. The expected structure is:
+UnifiedBH is used for building height adaptation and evaluation. The `overlap15` release can be downloaded from Baidu Netdisk:
+
+- UnifiedBH `overlap15`: [Baidu Netdisk](https://pan.baidu.com/s/1v6Oqzn5AOLc25mBJqWsY-g?pwd=bhey)
+- Extraction code: `bhey`
+
+After downloading and extracting the dataset, the expected structure is:
 
 ```text
 UnifiedBH/overlap15/
@@ -159,6 +168,7 @@ train_data_path: /path/to/UnifiedBH/overlap15/
 val_data_path: /path/to/UnifiedBH/overlap15/
 precomputed_disp_delta_root: /path/to/UnifiedBH/overlap15/disp/sd2h_full9_abs_groundfix_whusside724_20260622
 ```
+
 
 ## Quick Start
 
