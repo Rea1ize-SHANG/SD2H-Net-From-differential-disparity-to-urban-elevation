@@ -2,6 +2,7 @@
 
 SD2H-Net is a physically constrained framework for large-scale building height estimation from GaoFen-7 (GF-7) stereo imagery. The method first learns robust satellite stereo disparity on WHU-SSIDE, then adapts the stereo-derived differential disparity signal to building height estimation on UnifiedBH using building-instance masks and weak height supervision.
 
+The core idea is simple: instead of reconstructing a full DSM and subtracting a DTM, SD2H-Net constructs a local roof-ground differential disparity signal and calibrates it into building height at the instance level.
 
 ## Highlights
 
@@ -129,7 +130,7 @@ val_data_path: /path/to/WHU-SSIDE/valtest
 
 UnifiedBH is used for building height adaptation and evaluation. The `overlap15` release can be downloaded from Baidu Netdisk:
 
-- UnifiedBH `overlap15`: [Baidu Netdisk](https://pan.baidu.com/s/1v6Oqzn5AOLc25mBJqWsY-g?pwd=bhey)
+- UnifiedBH `overlap15`: [Baidu Netdisk](https://pan.baidu.com/s/1i1sF8wnDNjp2yV-oGfpl1Q?pwd=bhey)
 - Extraction code: `bhey`
 
 After downloading and extracting the dataset, the expected structure is:
@@ -161,6 +162,10 @@ The default configs use the following cities:
 HZ_049 HZ_050 HZ_057 HZ_DG_058 SZ_060 SZ_061 HK_062 SZ_DG_038 PRE_039
 ```
 
+The figure below illustrates representative UnifiedBH patches and the intermediate products used by SD2H-Net. From left to right, each row shows the original GF-7 patch, the same patch with all pre-filtering building-label contours overlaid in blue, the pre-trained stereo disparity map, and the final building-height prediction map.
+
+![UnifiedBH processing examples](assets/unifiedbh_process_grid.png)
+
 Update dataset paths in the height configs, for example:
 
 ```yaml
@@ -168,7 +173,6 @@ train_data_path: /path/to/UnifiedBH/overlap15/
 val_data_path: /path/to/UnifiedBH/overlap15/
 precomputed_disp_delta_root: /path/to/UnifiedBH/overlap15/disp/sd2h_full9_abs_groundfix_whusside724_20260622
 ```
-
 
 ## Quick Start
 
