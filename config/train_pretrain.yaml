@@ -1,0 +1,61 @@
+wandb: {}
+project_name: SD2H_Pretrain
+
+# ================= Resume and pretraining weights =================
+restore_ckpt: null           # Checkpoint path, e.g. './checkpoints/epoch_10.pth'
+resume: False                # True resumes optimizer/epoch state; False loads weights only.
+
+save_path: './checkpoints/pretrain_whustereo_300ep_1224/'      
+
+hydra:
+  run:
+    dir: ${save_path}
+
+batch_size: 4  #2
+num_gpu: 4 
+
+# ================= Dataset and path configuration =================
+train_dataset_name: 'whusside'         # whustereo, whusside, whumixdisp
+train_data_path: '/home/shangying/workspace/dataset/WHU-SSIDE/train' 
+val_dataset_name: 'whusside'
+val_data_path: '/home/shangying/workspace/dataset/WHU-SSIDE/valtest'  
+
+# ================= Variable settings =================
+encoder: 'vitb' 
+epochs: 60           # 60,  100 
+train_iters: 10       # 8
+valid_iters: 16      
+
+# ================ Ablation switches ==============
+use_stereo: True  # Set False for mono-only ablation.
+use_mono: True    # Set False for stereo-only ablation.
+
+# ================= Training strategy =================      
+image_size: [1024, 1024]  
+# Disparity range.
+max_disp: 64
+min_disp: -320
+# Learning rate and optimizer.
+save_epochs: 10              # Save every X epochs.
+val_epochs: 10               # Validate every X epochs.
+lr: 2.0e-4                   # 2.0e-4 
+optimizer: 'adamw'          
+wdecay: 1.0e-4              
+lr_scheduler: 'onecycle'    
+pct_start: 0.05             # Warm-up fraction.
+anneal_strategy: 'cos'      # Annealing strategy: 'cos' or 'linear'.
+
+# ================= Model parameters ================= 
+corr_implementation: "reg"
+corr_levels: 2
+corr_radius: 4  
+n_downsample: 4
+n_gru_layers: 3
+hidden_dims: [128, 128, 128]   
+
+# ================= Fixed augmentation parameters ================= 
+saturation_range: [1.0, 1.0]      # Image saturation range.
+do_flip: False                    # Enable image flipping.
+spatial_scale: [1.0, 1.0]         # Spatial scaling range.
+noyjitter: True                   # Disable y-axis jitter.
+seed: 1224                        # 324, 724, 1224
