@@ -2,7 +2,6 @@
 
 SD2H-Net is a physically constrained framework for large-scale building height estimation from GaoFen-7 (GF-7) stereo imagery. The method first learns robust satellite stereo disparity on WHU-SSIDE, then adapts the stereo-derived differential disparity signal to building height estimation on UnifiedBH using building-instance masks and weak height supervision.
 
-The core idea is simple: instead of reconstructing a full DSM and subtracting a DTM, SD2H-Net constructs a local roof-ground differential disparity signal and calibrates it into building height at the instance level.
 
 ## Highlights
 
