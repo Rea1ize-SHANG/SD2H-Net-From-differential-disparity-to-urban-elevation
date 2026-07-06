@@ -454,12 +454,11 @@ before running on a new machine.
 
 If this repository is useful for your research, please cite the corresponding paper after publication.
 
-## Data Availability
+## Supplement
 
-Download UnifiedBH and related resources from the project release page:
+Download related resources from the project release page:
 
 ```text
-UnifiedBH Datasets: <to be updated>
 Supplementary Data: <to be updated>
 ```
 
