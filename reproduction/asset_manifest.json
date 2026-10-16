@@ -1,0 +1,112 @@
+[
+  {
+    "name": "workflow",
+    "width": 2200,
+    "height": 1424,
+    "sha256": "114fe827fc4b3d6464561e018393d101d53d8becf0d1a5e4be11987e01b87bd5",
+    "source_asset": "fig1Comparison.pdf",
+    "source_sha256": "5f24fc1771c7bf85ca89ad506ba21f3152d5280d2067c99cfee7a2cc8f116f07",
+    "render_max_dimension": 2200,
+    "source_render_dimensions": [
+      2200,
+      1424
+    ],
+    "panel_crop_pixels": null,
+    "path": "workflow.png"
+  },
+  {
+    "name": "architecture",
+    "width": 2798,
+    "height": 1583,
+    "sha256": "30c38b8724c3225b21b99920b6edfddb34d4ee1ffef6f6408b25a35d208ac04c",
+    "source_asset": "fig4Network.pdf",
+    "source_sha256": "deb61e2114c19a8bc8da1b64bf547c68ef0103bc33c64092f7b3f40d38b3987a",
+    "render_max_dimension": 2800,
+    "source_render_dimensions": [
+      2800,
+      1588
+    ],
+    "panel_crop_pixels": null,
+    "path": "architecture.png"
+  },
+  {
+    "name": "height_maps",
+    "width": 1786,
+    "height": 2100,
+    "sha256": "eb1996afef24f599db6f01ee6c0f4af5479eaf0aac40d3716b61d9bbc01a3986",
+    "source_asset": "Pred.pdf",
+    "source_sha256": "817f9294a88a24fab7384a559f531171df9f3ce97a8d50c089f6c14d8880c517",
+    "render_max_dimension": 2100,
+    "source_render_dimensions": [
+      1786,
+      2100
+    ],
+    "panel_crop_pixels": null,
+    "path": "height_maps.png"
+  },
+  {
+    "name": "regional_benchmark",
+    "width": 2305,
+    "height": 948,
+    "sha256": "da1c03316c0484f1d652b9d8fe1983327b1d01bd4d039dabb594fd50d96b59f6",
+    "source_asset": "benchmark_terrain_compact.pdf",
+    "source_sha256": "c3a498653ea9019988b60dd66e22172031b9a2645073a40fde2fb8326500ee7a",
+    "render_max_dimension": 2400,
+    "source_render_dimensions": [
+      2400,
+      2014
+    ],
+    "panel_crop_pixels": [
+      0,
+      0,
+      2400,
+      1007
+    ],
+    "path": "regional_benchmark.png"
+  },
+  {
+    "name": "multiscale_comparison",
+    "width": 2055,
+    "height": 2092,
+    "sha256": "d17fd98e1dcc058797c02517c761e73b3b06a0004b61662e63b184e84f715d3b",
+    "source_asset": "multiscale_061.pdf",
+    "source_sha256": "e89187318ae757e7a460563f08d40684c96014769d3451f4161b6214ba0481cd",
+    "render_max_dimension": 2100,
+    "source_render_dimensions": [
+      2055,
+      2100
+    ],
+    "panel_crop_pixels": null,
+    "path": "multiscale_comparison.png"
+  },
+  {
+    "name": "kunming_transfer_full",
+    "width": 2584,
+    "height": 816,
+    "sha256": "83836f4640fc32487c8ed3f82e24f5f8df0c96f662292de914daa9fe6e5a5000",
+    "source_asset": "kunming_full_scene_1x3.pdf",
+    "source_sha256": "8ed67b7d919e047e8b40f27255f9d2dbdd6bce0c9f60a18feb1a209741f1cab6",
+    "render_max_dimension": 2600,
+    "source_render_dimensions": [
+      2600,
+      833
+    ],
+    "panel_crop_pixels": null,
+    "path": "kunming_transfer_full.png"
+  },
+  {
+    "name": "kunming_transfer_screened",
+    "width": 2584,
+    "height": 816,
+    "sha256": "2eb6872990a64b34b58f0232a48632238e1de2fc658115dd7a8a4e39a1fd5f4c",
+    "source_asset": "kunming_quality_scatter_1x3.pdf",
+    "source_sha256": "110f4b848015a6424690785d5a3f7afe2e10816a882c0d7da8c168124e613de7",
+    "render_max_dimension": 2600,
+    "source_render_dimensions": [
+      2600,
+      833
+    ],
+    "panel_crop_pixels": null,
+    "path": "kunming_transfer_screened.png"
+  }
+]
