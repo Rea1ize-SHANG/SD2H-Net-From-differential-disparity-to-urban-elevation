@@ -1,5 +1,29 @@
 # SD2H-Net: From Differential Disparity to Urban Elevation
 
+<!-- SD2H-REPRODUCTION-QUICK-REFERENCE-START -->
+## Reproduction Quick Reference
+
+The [step-by-step reproduction guide](reproduction/README.md) covers environment setup, data paths, stereo pre-training, disparity caching, height adaptation, evaluation, and plotting.
+
+```bash
+python3 reproduction/run_pipeline.py --help
+python3 reproduction/run_pipeline.py --stage train --config-name train_city_stratified_50_50 --gpu 0 --dry-run
+```
+
+| Task | Entry point |
+|---|---|
+| Stereo pre-training | `train_pretrain.py` |
+| Disparity and local-ground cache | `precompute_unifiedbh_disp_delta.py` |
+| Protocol preparation | `run_prepare_stereo_calibration_protocols.sh` |
+| Height adaptation | `train_finetune.py` |
+| Height evaluation and maps | `evaluate_height.py` |
+| Protocol figures | `run_plot_stereo_calibration_protocols.sh` |
+| Unified stage launcher | `reproduction/run_pipeline.py` |
+| Display export and integrity | `reproduction/export_figures.py`, `reproduction/verify_assets.py` |
+
+Add `--dry-run` to inspect any stage before running it. New display figures are collected at the [end of this README](#additional-visualizations).
+<!-- SD2H-REPRODUCTION-QUICK-REFERENCE-END -->
+
 SD2H-Net is a physically constrained framework for large-scale building height estimation from GaoFen-7 (GF-7) stereo imagery. The method first learns robust satellite stereo disparity on WHU-SSIDE, then adapts the stereo-derived differential disparity signal to building height estimation on UnifiedBH using building-instance masks and weak height supervision.
 
 The core idea is simple: instead of reconstructing a full DSM and subtracting a DTM, SD2H-Net constructs a local roof-ground differential disparity signal and calibrates it into building height at the instance level.
@@ -467,3 +491,40 @@ Some intermediate products depend on the redistribution policy of the original G
 ## License
 
 The code and dataset are released for academic research. Please check the final repository license and the redistribution terms of the original satellite imagery before commercial or large-scale redistribution use.
+
+
+<!-- SD2H-ADDITIONAL-VISUALIZATIONS-START -->
+## Additional Visualizations
+
+### Workflow
+
+![Conventional and differential-disparity workflows](reproduction/workflow.png)
+
+### Network architecture
+
+![Stereo pre-training and building-level height adaptation](reproduction/architecture.png)
+
+### Building-height maps
+
+![GF-7 image context and predicted building-height maps](reproduction/height_maps.png)
+
+### Paired regional evaluation
+
+![Paired scene and regional evaluation panels](reproduction/regional_benchmark.png)
+
+### Local comparison across spatial supports
+
+![Local paired maps at building and grid supports](reproduction/multiscale_comparison.png)
+
+### Kunming geographic transfer
+
+Complete-scene footprints:
+
+![Complete-scene transfer plots for three Kunming scenes](reproduction/kunming_transfer_full.png)
+
+Quality-screened footprints:
+
+![Quality-screened transfer plots for three Kunming scenes](reproduction/kunming_transfer_screened.png)
+
+See the [reproduction guide](reproduction/README.md) for the code entry points and figure-export commands.
+<!-- SD2H-ADDITIONAL-VISUALIZATIONS-END -->
