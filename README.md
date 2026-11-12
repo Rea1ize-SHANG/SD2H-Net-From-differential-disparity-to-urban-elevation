@@ -43,7 +43,11 @@ RPC-DSM additionally requires GDAL, rpcm and s2p with its native tools; see its 
 
 Supply model weights locally. Place the selected Depth Anything V2 checkpoint at `pretrained/depth_anything_v2_vitb.pth` for the default ViT-B configuration. Stereo and height checkpoints are written to `checkpoints/` during training.
 
-Download [WHU-SSIDE](https://github.com/zhanggb1997/WHU-SSIDE) from its authors and organize it as:
+We thank the WHU-SSIDE authors for releasing this GF-7 satellite stereo benchmark. WHU-SSIDE is used for disparity pre-training and disparity evaluation. This dataset is provided by the WHU-SSIDE authors; please download it from the official repository and follow their license and citation requirements:
+
+- WHU-SSIDE repository: [zhanggb1997/WHU-SSIDE](https://github.com/zhanggb1997/WHU-SSIDE)
+
+After downloading the dataset, organize it with the following structure:
 
 ```text
 WHU-SSIDE/
@@ -51,7 +55,12 @@ WHU-SSIDE/
 └── valtest/{ImageL,ImageR,Disp}/
 ```
 
-UnifiedBH `overlap15` is available from [Baidu Netdisk](https://pan.baidu.com/s/1i1sF8wnDNjp2yV-oGfpl1Q?pwd=bhey), extraction code `bhey`:
+UnifiedBH is the dataset constructed in this work for building height adaptation and evaluation. The `overlap15` release can be downloaded from Baidu Netdisk:
+
+- UnifiedBH `overlap15`: [Baidu Netdisk](https://pan.baidu.com/s/1i1sF8wnDNjp2yV-oGfpl1Q?pwd=bhey)
+- Extraction code: `bhey`
+
+After downloading and extracting the dataset, the expected structure is:
 
 ```text
 UnifiedBH/overlap15/
