@@ -621,7 +621,7 @@ def _make_config(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base_config", default="config/train_stereo_calib_base.yaml")
-    parser.add_argument("--metrics_csv", default="/home/shangying/workspace/dataset/UnifiedBH/overlap15/disp/sd2h_full9_abs_groundfix_whusside724_20260622/instance_metrics.csv")
+    parser.add_argument("--metrics_csv", default="data/UnifiedBH/overlap15/disp/sd2h_full9_abs_groundfix_whusside724_20260622/instance_metrics.csv")
     parser.add_argument("--base_filter_manifest", default="checkpoints/stereo_calib_noise_filter_manifest/instance_filter_manifest.json")
     parser.add_argument("--output_root", default="checkpoints/stereo_calibration_protocols_seed724")
     parser.add_argument("--config_dir", default="config")

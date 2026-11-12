@@ -72,7 +72,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--metrics_csv",
-        default="/home/shangying/workspace/dataset/UnifiedBH/overlap15/disp/sd2h_full9_abs_groundfix_whusside724_20260622/instance_metrics.csv",
+        default="data/UnifiedBH/overlap15/disp/sd2h_full9_abs_groundfix_whusside724_20260622/instance_metrics.csv",
     )
     parser.add_argument("--out_dir", required=True)
     parser.add_argument("--cities", nargs="+", default=DEFAULT_CITIES)

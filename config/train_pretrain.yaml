@@ -5,7 +5,7 @@ project_name: SD2H_Pretrain
 restore_ckpt: null           # Checkpoint path, e.g. './checkpoints/epoch_10.pth'
 resume: False                # True resumes optimizer/epoch state; False loads weights only.
 
-save_path: './checkpoints/pretrain_whustereo_300ep_1224/'      
+save_path: ./checkpoints/pretrain_whusside_60ep_724/
 
 hydra:
   run:
@@ -16,9 +16,9 @@ num_gpu: 4
 
 # ================= Dataset and path configuration =================
 train_dataset_name: 'whusside'         # whustereo, whusside, whumixdisp
-train_data_path: '/home/shangying/workspace/dataset/WHU-SSIDE/train' 
+train_data_path: 'data/WHU-SSIDE/train'
 val_dataset_name: 'whusside'
-val_data_path: '/home/shangying/workspace/dataset/WHU-SSIDE/valtest'  
+val_data_path: 'data/WHU-SSIDE/valtest'
 
 # ================= Variable settings =================
 encoder: 'vitb' 

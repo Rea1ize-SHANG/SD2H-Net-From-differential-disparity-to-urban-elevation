@@ -3,8 +3,8 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-PY=${PY:-/home/shangying/miniconda3/envs/sd2h/bin/python}
-DATA_ROOT=${DATA_ROOT:-/home/shangying/workspace/dataset/UnifiedBH/overlap15}
+PY=${PY:-python3}
+DATA_ROOT=${DATA_ROOT:-data/UnifiedBH/overlap15}
 CACHE_ROOT=${CACHE_ROOT:-${DATA_ROOT}/disp/sd2h_full9_abs_groundfix_whusside724_20260622}
 GPU_ID=${GPU_ID:-0}
 export CUDA_VISIBLE_DEVICES="$GPU_ID"
@@ -34,7 +34,6 @@ echo "[2/4] Rebuild label-dependent delta maps and instance_metrics.csv from cac
   --overwrite
 
 echo "[3/4] Rebuild conservative noisy-instance filter manifest"
-rm -rf checkpoints/stereo_calib_noise_filter_manifest
 "$PY" tools/build_instance_filter_manifest_from_metrics.py \
   --metrics_csv "$CACHE_ROOT/instance_metrics.csv" \
   --cities "${CITIES[@]}" \
@@ -46,6 +45,6 @@ rm -rf checkpoints/stereo_calib_noise_filter_manifest
   --min_keep_per_city_bin 30
 
 echo "[4/4] Generate leakage-safe training protocols"
-./run_prepare_stereo_calibration_protocols.sh
+bash ./run_prepare_stereo_calibration_protocols.sh
 
 echo "[done] Rebuilt calibration inputs and configs."

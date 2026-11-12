@@ -1,40 +1,8 @@
-# SD2H-Net: From Differential Disparity to Urban Elevation
+# SD2H-Net: Physics-Guided Building Height Estimation from GF-7 Stereo Imagery
 
-<!-- SD2H-REPRODUCTION-QUICK-REFERENCE-START -->
-## Reproduction Quick Reference
+SD2H-Net estimates building height from GF-7 stereo imagery using local roof-ground differential disparity and instance-level height calibration with product-derived height labels.
 
-The [step-by-step reproduction guide](reproduction/README.md) covers environment setup, data paths, stereo pre-training, disparity caching, height adaptation, evaluation, and plotting.
-
-```bash
-python3 reproduction/run_pipeline.py --help
-python3 reproduction/run_pipeline.py --stage train --config-name train_city_stratified_50_50 --gpu 0 --dry-run
-```
-
-| Task | Entry point |
-|---|---|
-| Stereo pre-training | `train_pretrain.py` |
-| Disparity and local-ground cache | `precompute_unifiedbh_disp_delta.py` |
-| Protocol preparation | `run_prepare_stereo_calibration_protocols.sh` |
-| Height adaptation | `train_finetune.py` |
-| Height evaluation and maps | `evaluate_height.py` |
-| Protocol figures | `run_plot_stereo_calibration_protocols.sh` |
-| Unified stage launcher | `reproduction/run_pipeline.py` |
-| Display export and integrity | `reproduction/export_figures.py`, `reproduction/verify_assets.py` |
-
-Add `--dry-run` to inspect any stage before running it.
-<!-- SD2H-REPRODUCTION-QUICK-REFERENCE-END -->
-
-SD2H-Net is a physically guided framework for large-scale building height estimation from GaoFen-7 (GF-7) stereo imagery. The method first learns robust satellite stereo disparity on WHU-SSIDE, then adapts the stereo-derived differential disparity signal to building height estimation on UnifiedBH using building-instance masks and weak height supervision.
-
-The core idea is: instead of reconstructing a full DSM and subtracting a DTM, SD2H-Net constructs a local roof-ground differential disparity signal and calibrates it into building height at the instance level.
-
-## Highlights
-
-- Satellite-stereo disparity pre-training on WHU-SSIDE.
-- GF-7 building height adaptation on UnifiedBH.
-- Local ground disparity estimation and roof-ground differential disparity construction.
-- Instance-level height calibration with building masks and weak labels.
-- Intra-city and cross-city evaluation protocols.
+The training workflow has two stages: stereo disparity pre-training on WHU-SSIDE, followed by building-height adaptation on UnifiedBH with the stereo front end frozen. The RPC-DSM comparison workflow is provided in [`rpc_dsm/`](rpc_dsm/README.md).
 
 ![Network](assets/fig4Network_01.png)
 
@@ -42,419 +10,170 @@ The figure below illustrates representative UnifiedBH patches and the intermedia
 
 ![UnifiedBH processing examples](assets/unifiedbh_process_grid.png)
 
-## Repository Layout
+## Repository layout
 
 ```text
-SD2H/
-├── config/                         # Hydra configs for pre-training and height adaptation
-├── core/                           # SD2H-Net model, stereo datasets, height datasets, utilities
-├── tools/                          # Dataset/cache preparation and plotting utilities
-├── plotting/                       # UnifiedBH figure generation scripts
-├── checkpoints/                    # Released or reproduced model checkpoints and protocol files
-├── pretrained/                     # DepthAnythingV2 weights
-├── train_pretrain.py               # WHU-SSIDE disparity pre-training
-├── train_finetune.py               # UnifiedBH height adaptation
-├── evaluate_stereo.py              # Disparity evaluation
-├── evaluate_height.py              # Building height evaluation
-├── precompute_unifiedbh_disp_delta.py
-├── run_train.sh
-├── run_finetune.sh
-├── run_evaluate.sh
-└── run_plot_stereo_calibration_protocols.sh
+config/                             Training and protocol configurations
+core/                               Stereo and building-height models and datasets
+tools/                              Mask, cache, filter and protocol preparation
+reproduction/run_pipeline.py         Configurable stage launcher
+rpc_dsm/                            Raw GF-7 stereo to RPC-DSM building heights
+train_pretrain.py                   WHU-SSIDE disparity pre-training
+train_finetune.py                   UnifiedBH height adaptation
+evaluate_stereo.py                  Disparity evaluation
+evaluate_height.py                  Building-height evaluation
+precompute_unifiedbh_disp_delta.py  Disparity, local-ground and differential caches
 ```
 
 ## Environment
 
-The experiments were developed with Python 3.8 and PyTorch 2.x. A CUDA-enabled GPU is required for training and recommended for evaluation.
+The verified development environment uses Python 3.8, PyTorch 2.4.1, Accelerate 1.0.1 and timm 0.6.13. Use a CUDA-enabled PyTorch installation for training.
 
 ```bash
 conda create -n sd2h python=3.8 -y
 conda activate sd2h
+pip install torch==2.4.1 torchvision==0.19.1 --index-url https://download.pytorch.org/whl/cu121
+pip install accelerate==1.0.1 hydra-core omegaconf tqdm numpy scipy opencv-python \
+  scikit-image matplotlib pillow timm==0.6.13 wandb scikit-learn rasterio
 ```
 
-Install PyTorch according to your CUDA version. For CUDA 11.7:
+RPC-DSM additionally requires GDAL, rpcm and s2p with its native tools; see its [environment instructions](rpc_dsm/README.md#environment).
 
-```bash
-pip install torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 \
-  --index-url https://download.pytorch.org/whl/cu117
-```
+## Weights and data
 
-Install the remaining dependencies:
+Supply model weights locally. Place the selected Depth Anything V2 checkpoint at `pretrained/depth_anything_v2_vitb.pth` for the default ViT-B configuration. Stereo and height checkpoints are written to `checkpoints/` during training.
 
-```bash
-pip install \
-  accelerate==1.0.1 \
-  hydra-core \
-  omegaconf \
-  tqdm \
-  numpy \
-  scipy \
-  opencv-python \
-  scikit-image \
-  matplotlib \
-  pillow \
-  timm==0.6.13 \
-  wandb \
-  scikit-learn \
-  rasterio
-```
-
-Optional packages used by some analysis scripts:
-
-```bash
-pip install fvcore
-```
-
-## Pretrained Weights
-
-Place DepthAnythingV2 weights under `pretrained/`:
-
-```text
-pretrained/
-├── depth_anything_v2_vits.pth
-├── depth_anything_v2_vitb.pth
-└── depth_anything_v2_vitl.pth
-```
-
-The released or reproduced SD2H checkpoints are expected under:
-
-```text
-checkpoints/
-├── pretrain_whusside_60ep_724/
-├── city_stratified_10_90/
-├── city_stratified_20_80/
-├── city_stratified_50_50/
-└── quality_diverse_cross_city_hz_dg_058_sz_dg_038_to_7cities/
-```
-
-## Data Preparation
-
-### WHU-SSIDE
-
-WHU-SSIDE is used for disparity pre-training and disparity evaluation. This dataset is provided by the WHU-SSIDE authors; please download it from the official repository and follow their license and citation requirements:
-
-- WHU-SSIDE repository: [zhanggb1997/WHU-SSIDE](https://github.com/zhanggb1997/WHU-SSIDE)
-
-We thank the WHU-SSIDE authors for releasing this GF-7 satellite stereo benchmark. After downloading the dataset, organize it with the following structure:
+Download [WHU-SSIDE](https://github.com/zhanggb1997/WHU-SSIDE) from its authors and organize it as:
 
 ```text
 WHU-SSIDE/
-├── train/
-│   ├── ImageL/
-│   ├── ImageR/
-│   └── Disp/
-└── valtest/
-    ├── ImageL/
-    ├── ImageR/
-    └── Disp/
+├── train/{ImageL,ImageR,Disp}/
+└── valtest/{ImageL,ImageR,Disp}/
 ```
 
-Update the paths in `config/train_pretrain.yaml`:
-
-```yaml
-train_data_path: /path/to/WHU-SSIDE/train
-val_data_path: /path/to/WHU-SSIDE/valtest
-```
-
-### UnifiedBH
-
-UnifiedBH is used for building height adaptation and evaluation. The `overlap15` release can be downloaded from Baidu Netdisk:
-
-- UnifiedBH `overlap15`: [Baidu Netdisk](https://pan.baidu.com/s/1i1sF8wnDNjp2yV-oGfpl1Q?pwd=bhey)
-- Extraction code: `bhey`
-
-After downloading and extracting the dataset, the expected structure is:
+UnifiedBH `overlap15` is available from [Baidu Netdisk](https://pan.baidu.com/s/1i1sF8wnDNjp2yV-oGfpl1Q?pwd=bhey), extraction code `bhey`:
 
 ```text
 UnifiedBH/overlap15/
-├── left/
-│   └── <CITY>/*.tif
-├── right/
-│   └── <CITY>/*.tif
-├── label/
-│   └── <CITY>/*.tif
-├── mask/                          # optional; masks can also be generated from labels
-│   └── <CITY>/*.tif
-└── disp/
-    └── sd2h_full9_abs_groundfix_whusside724_20260622/
-        ├── disp_npy/
-        ├── delta_abs_npy/
-        ├── delta_signed_npy/
-        ├── delta_relu_npy/
-        ├── delta_reverse_relu_npy/
-        ├── local_ground_npy/
-        └── instance_metrics.csv
+├── left/<CITY>/*.tif
+├── right/<CITY>/*.tif
+├── label/<CITY>/*.tif
+├── mask/<CITY>/*.tif
+└── disp/<CACHE>/
+    ├── disp_npy/
+    ├── delta_abs_npy/
+    ├── local_ground_npy/
+    └── instance_metrics.csv
 ```
 
-The default configs use the following cities:
+The retained cache stores disparity, absolute roof-ground differential disparity and local-ground disparity. Directional statistics are derived in memory when needed.
 
-```text
-HZ_049 HZ_050 HZ_057 HZ_DG_058 SZ_060 SZ_061 HK_062 SZ_DG_038 PRE_039
-```
+The default city identifiers are `HZ_049 HZ_050 HZ_057 HZ_DG_058 SZ_060 SZ_061 HK_062 SZ_DG_038 PRE_039`.
 
-Update dataset paths in the height configs, for example:
-
-```yaml
-train_data_path: /path/to/UnifiedBH/overlap15/
-val_data_path: /path/to/UnifiedBH/overlap15/
-precomputed_disp_delta_root: /path/to/UnifiedBH/overlap15/disp/sd2h_full9_abs_groundfix_whusside724_20260622
-```
-
-## Quick Start
-
-### 1. Disparity Evaluation on WHU-SSIDE
-
-If the pre-trained disparity checkpoint is available, run:
+Set paths to your local data and cache:
 
 ```bash
-python3 evaluate_stereo.py \
+export WHU=/path/to/WHU-SSIDE
+export DATA=/path/to/UnifiedBH/overlap15
+export CACHE="$DATA/disp/sd2h_full9_abs_groundfix_whusside724_20260622"
+```
+
+If instance masks are absent, create them from the height-label connected components:
+
+```bash
+python tools/generate_unifiedbh_masks.py --data-root "$DATA" --workers 8
+```
+
+## 1. Stereo pre-training
+
+```bash
+python reproduction/run_pipeline.py --stage pretrain \
+  --data-root "$WHU" --gpu 0,1,2,3 --num-processes 4 --batch-size 4
+```
+
+The default configuration is `config/train_pretrain.yaml`. The trained checkpoint is saved under `checkpoints/pretrain_whusside_60ep_724/`.
+
+To evaluate an existing stereo checkpoint:
+
+```bash
+python evaluate_stereo.py \
   --restore_ckpt checkpoints/pretrain_whusside_60ep_724/final.pth \
-  --data_path /path/to/WHU-SSIDE/valtest \
-  --dataset whusside \
-  --valid_iters 16 \
-  --batch_size 1 \
-  --mixed_precision
+  --data_path "$WHU/valtest" --dataset whusside \
+  --valid_iters 16 --batch_size 1 --mixed_precision
 ```
 
-To save disparity visualizations:
+## 2. Build disparity and differential-disparity caches
 
 ```bash
-python3 evaluate_stereo.py \
-  --restore_ckpt checkpoints/pretrain_whusside_60ep_724/final.pth \
-  --data_path /path/to/WHU-SSIDE/valtest \
-  --dataset whusside \
-  --valid_iters 16 \
-  --batch_size 1 \
-  --mixed_precision \
-  --save_vis \
-  --output_directory outputs/whusside_disp_vis
+python reproduction/run_pipeline.py --stage precompute \
+  --data-root "$DATA" --cache-root "$CACHE" \
+  --stereo-checkpoint checkpoints/pretrain_whusside_60ep_724/final.pth --gpu 0
 ```
 
-### 2. Disparity Pre-training
+This keeps stereo evidence fixed for height adaptation. For direct invocation, the output option is `--output_directory`.
 
-Edit `config/train_pretrain.yaml`, then run:
+## 3. Prepare filtering and train/validation protocols
 
 ```bash
-PY=python3 bash run_train.sh
+python reproduction/run_pipeline.py --stage prepare \
+  --data-root "$DATA" --cache-root "$CACHE"
 ```
 
-or directly:
+This synchronizes caches with the selected tiles, rebuilds instance statistics, creates the noisy-instance filter, and generates the train/validation manifests and calibrated configurations. It fits calibration coefficients using the training subset only.
+
+Manifests are saved under `checkpoints/stereo_calibration_protocols_seed724/`; generated configurations are written to `config/`. The protocols are intra-city 10/90, 20/80, 50/50 and cross-city transfer.
+
+## 4. Height adaptation
+
+Train one protocol:
 
 ```bash
-accelerate launch \
-  --num_machines=1 \
-  --num_processes=4 \
-  --mixed_precision bf16 \
-  train_pretrain.py
+python reproduction/run_pipeline.py --stage train \
+  --data-root "$DATA" --cache-root "$CACHE" \
+  --config-name train_city_stratified_50_50 --gpu 0 --batch-size 1
 ```
 
-Important config fields:
-
-```yaml
-train_dataset_name: whusside
-val_dataset_name: whusside
-train_data_path: /path/to/WHU-SSIDE/train
-val_data_path: /path/to/WHU-SSIDE/valtest
-save_path: ./checkpoints/pretrain_whusside_60ep_724/
-min_disp: -320
-max_disp: 64
-epochs: 60
-```
-
-### 3. Precompute UnifiedBH Disparity and Differential Disparity
-
-UnifiedBH height adaptation can use precomputed disparity, local ground disparity, and differential disparity maps. This is the recommended reproducible path because it keeps stereo evidence fixed during height adaptation.
+Or train the prepared protocols sequentially:
 
 ```bash
-python3 precompute_unifiedbh_disp_delta.py \
-  --data_path /path/to/UnifiedBH/overlap15 \
-  --restore_ckpt checkpoints/pretrain_whusside_60ep_724/final.pth \
-  --output_root /path/to/UnifiedBH/overlap15/disp/sd2h_full9_abs_groundfix_whusside724_20260622 \
-  --cities HZ_049 HZ_050 HZ_057 HZ_DG_058 SZ_060 SZ_061 HK_062 SZ_DG_038 PRE_039 \
-  --valid_iters 16 \
-  --batch_size 1 \
-  --mixed_precision \
-  --skip_existing
+PY=python GPU_IDS=0 NUM_PROCS=1 bash run_train_stereo_calibration_protocols.sh
 ```
 
-If cached disparity already exists and only label-dependent delta maps or instance metrics need to be synchronized with the current tiles, use:
+The height configuration controls instance filtering, height-loss settings, calibration and checkpoint selection. `height_delta_source: precomputed` uses the retained cache without updating the stereo front end.
+
+## 5. Height evaluation
 
 ```bash
-DATA_ROOT=/path/to/UnifiedBH/overlap15 \
-CACHE_ROOT=/path/to/UnifiedBH/overlap15/disp/sd2h_full9_abs_groundfix_whusside724_20260622 \
-PY=python3 \
-bash run_rebuild_stereo_calibration_inputs.sh
+python reproduction/run_pipeline.py --stage evaluate \
+  --data-root "$DATA" \
+  --height-config config/train_city_stratified_50_50.yaml \
+  --height-checkpoint checkpoints/city_stratified_50_50/finetune_best_rmse.pth \
+  --output-root outputs/city_stratified_50_50_eval --gpu 0
 ```
 
-### 4. Prepare Height Adaptation Protocols
+The selected configuration supplies the cache and validation-manifest paths. Use the matching configuration and checkpoint together.
 
-Generate leakage-safe train/validation manifests and protocol configs:
+## RPC-DSM workflow
 
 ```bash
-DATA_ROOT=/path/to/UnifiedBH/overlap15 \
-CACHE_ROOT=/path/to/UnifiedBH/overlap15/disp/sd2h_full9_abs_groundfix_whusside724_20260622 \
-PY=python3 \
-bash run_prepare_stereo_calibration_protocols.sh
+python -m rpc_dsm.pipeline \
+  --raw-root /path/to/GF7_raw \
+  --label /path/to/buildings.shp \
+  --checkpoint checkpoints/pretrain_whusside_60ep_724/final.pth \
+  --output-root outputs/rpc_dsm_run --gpus 0
 ```
 
-This creates protocol files under:
+The stages are preparation, rectification, common cropping, disparity, RPC triangulation, geolocation, projection, label alignment and building-height extraction. See [`rpc_dsm/README.md`](rpc_dsm/README.md) for inputs, stage resumption and output definitions.
 
-```text
-checkpoints/stereo_calibration_protocols_seed724/
-```
-
-### 5. Height Adaptation on UnifiedBH
-
-Run all released protocols:
-
-```bash
-PY=python3 GPU_IDS=0,1 NUM_PROCS=2 bash run_train_stereo_calibration_protocols.sh
-```
-
-The script trains:
-
-```text
-train_quality_diverse_cross_city
-train_city_stratified_10_90
-train_city_stratified_20_80
-train_city_stratified_50_50
-```
-
-You can also run one protocol:
-
-```bash
-python3 -m accelerate.commands.launch \
-  --num_processes=1 \
-  train_finetune.py --config-name train_city_stratified_50_50
-```
-
-Main outputs:
-
-```text
-checkpoints/city_stratified_50_50/
-├── finetune_best_rmse.pth
-├── finetune_best_score.pth
-├── finetune_best_high30_rmse.pth
-└── train.log
-```
-
-## Evaluation and Visualization
-
-### Height Evaluation
-
-Evaluate a trained height adaptation checkpoint:
-
-```bash
-python3 evaluate_height.py \
-  --config_yaml config/train_city_stratified_50_50.yaml \
-  --restore_ckpt checkpoints/city_stratified_50_50/finetune_best_rmse.pth \
-  --data_path /path/to/UnifiedBH/overlap15 \
-  --eval_cities HZ_049 HZ_050 HZ_057 HZ_DG_058 SZ_060 SZ_061 HK_062 SZ_DG_038 PRE_039 \
-  --output_directory outputs/city_stratified_50_50_eval \
-  --batch_size 2 \
-  --valid_iters 0 \
-  --mixed_precision \
-  --no_bin_metrics
-```
-
-To save predicted height maps:
-
-```bash
-python3 evaluate_height.py \
-  --config_yaml config/train_city_stratified_50_50.yaml \
-  --restore_ckpt checkpoints/city_stratified_50_50/finetune_best_rmse.pth \
-  --data_path /path/to/UnifiedBH/overlap15 \
-  --eval_cities HZ_049 HZ_050 \
-  --output_directory outputs/height_maps \
-  --batch_size 2 \
-  --valid_iters 0 \
-  --mixed_precision \
-  --save_vis
-```
-
-### Paper Figures
-
-Generate UnifiedBH scatter plots and boxplots:
-
-```bash
-DATA_ROOT=/path/to/UnifiedBH/overlap15 \
-OUT_ROOT=/path/to/UnifiedBH/overlap15/output \
-PY=python3 \
-GPU_ID=0 \
-bash run_plot_stereo_calibration_protocols.sh
-```
-
-Outputs are written to:
-
-```text
-UnifiedBH/overlap15/output/
-├── quality_diverse_cross_city/
-├── city_stratified_10_90/
-├── city_stratified_20_80/
-└── city_stratified_50_50/
-```
-
-## Configuration Notes
-
-- `height_delta_source: precomputed` uses cached disparity and differential disparity maps.
-- `precomputed_delta_subdir: delta_abs_npy` uses non-negative differential disparity.
-- `precomputed_ground_subdir: local_ground_npy` provides the local ground disparity reference.
-- `instance_filter_manifest` controls noisy-instance filtering.
-- `mask_from_label: true` generates connected-component building masks from height labels when explicit masks are unavailable.
-- `mask_min_instance_pixels` removes tiny instances.
-- `height_output_mode: calibrated` enables calibrated instance-level height prediction.
-
-## Reproducing the Main Experiments
-
-The recommended order is:
-
-```bash
-# 1. Evaluate or train the WHU-SSIDE disparity backbone.
-PY=python3 bash run_train.sh
-
-# 2. Precompute UnifiedBH disparity and differential disparity.
-python3 precompute_unifiedbh_disp_delta.py \
-  --data_path /path/to/UnifiedBH/overlap15 \
-  --restore_ckpt checkpoints/pretrain_whusside_60ep_724/final.pth \
-  --output_root /path/to/UnifiedBH/overlap15/disp/sd2h_full9_abs_groundfix_whusside724_20260622 \
-  --cities HZ_049 HZ_050 HZ_057 HZ_DG_058 SZ_060 SZ_061 HK_062 SZ_DG_038 PRE_039 \
-  --valid_iters 16 \
-  --batch_size 1 \
-  --mixed_precision
-
-# 3. Rebuild calibration inputs and train/validation protocols.
-DATA_ROOT=/path/to/UnifiedBH/overlap15 \
-CACHE_ROOT=/path/to/UnifiedBH/overlap15/disp/sd2h_full9_abs_groundfix_whusside724_20260622 \
-PY=python3 \
-bash run_rebuild_stereo_calibration_inputs.sh
-
-# 4. Train height adaptation protocols.
-PY=python3 GPU_IDS=0,1 NUM_PROCS=2 bash run_train_stereo_calibration_protocols.sh
-
-# 5. Generate evaluation figures.
-DATA_ROOT=/path/to/UnifiedBH/overlap15 \
-OUT_ROOT=/path/to/UnifiedBH/overlap15/output \
-PY=python3 GPU_ID=0 bash run_plot_stereo_calibration_protocols.sh
-```
+Add `--dry-run` to the stage launcher to inspect a command before executing it. A compact command reference is available in [`reproduction/README.md`](reproduction/README.md).
 
 ## Citation
 
 If this repository is useful for your research, please cite the corresponding paper after publication.
 
-## Supplement
-
-Download related resources from the project release page:
-
-```text
-Supplementary Data: <to be updated>
-```
-
-Some intermediate products depend on the redistribution policy of the original GF-7 imagery and may be provided upon reasonable request.
-
 ## License
 
-The code and dataset are released for academic research. Please check the final repository license and the redistribution terms of the original satellite imagery before commercial or large-scale redistribution use.
-
+Please follow the applicable source-code, model-weight and satellite-data licenses and redistribution terms.
 
 <!-- SD2H-ADDITIONAL-VISUALIZATIONS-START -->
 ## Additional Visualizations
@@ -471,5 +190,4 @@ The code and dataset are released for academic research. Please check the final 
 
 ![Local paired maps at building and grid supports](reproduction/multiscale_comparison.png)
 
-See the [reproduction guide](reproduction/README.md) for the code entry points and figure-export commands.
 <!-- SD2H-ADDITIONAL-VISUALIZATIONS-END -->

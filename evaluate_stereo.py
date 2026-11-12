@@ -365,7 +365,7 @@ if __name__ == '__main__':
     parser.add_argument('--device', type=str, default='cuda:0')
     
     # Default output path.
-    parser.add_argument('--output_directory', default="/home/shangying/workspace/output/disp/sd2h/whusside/valtest")
+    parser.add_argument('--output_directory', default="outputs/whusside_evaluation")
     
     parser.add_argument('--batch_size', type=int, default=4)
     parser.add_argument('--mixed_precision', action='store_true')

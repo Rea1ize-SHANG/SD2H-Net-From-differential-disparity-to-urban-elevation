@@ -3,9 +3,9 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-PY=${PY:-/home/shangying/miniconda3/envs/sd2h/bin/python}
-GPU_IDS=${GPU_IDS:-3,4}
-NUM_PROCS=${NUM_PROCS:-2}
+PY=${PY:-python3}
+GPU_IDS=${GPU_IDS:-0}
+NUM_PROCS=${NUM_PROCS:-$(awk -F, '{print NF}' <<< "$GPU_IDS")}
 export CUDA_VISIBLE_DEVICES="$GPU_IDS"
 export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
 
@@ -17,7 +17,7 @@ run_train() {
   "$PY" -m accelerate.commands.launch \
     --num_processes="$NUM_PROCS" \
     --main_process_port="${MAIN_PROCESS_PORT:-29641}" \
-    train_finetune.py --config-name "$config_name" > "${save_dir}/train.log" 2>&1
+    train_finetune.py --config-name "$config_name" num_gpu="$NUM_PROCS" batch_size="${BATCH_SIZE:-$NUM_PROCS}" > "${save_dir}/train.log" 2>&1
   echo "[$(date '+%F %T')] END $config_name"
 }
 

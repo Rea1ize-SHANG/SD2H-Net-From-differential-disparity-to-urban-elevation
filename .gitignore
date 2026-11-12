@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*.pth
+*.pt
+*.ckpt
+*.bin
+checkpoints/
+pretrained/
+data/
+outputs/
+logs/
+wandb/
+.hydra/

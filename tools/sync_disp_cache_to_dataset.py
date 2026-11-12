@@ -36,9 +36,6 @@ DEFAULT_CITIES = [
 
 CACHE_PATTERNS = {
     "disp_npy": ("Disp_", ".npy"),
-    "delta_relu_npy": ("DeltaDisp_", ".npy"),
-    "delta_signed_npy": ("DeltaDispSigned_", ".npy"),
-    "delta_reverse_relu_npy": ("DeltaDispReverse_", ".npy"),
     "delta_abs_npy": ("DeltaDispAbs_", ".npy"),
     "local_ground_npy": ("LocalGroundDisp_", ".npy"),
     "disp_png": ("Disp_", ".png"),
@@ -100,10 +97,10 @@ def _cleanup_cache_dir(cache_root: Path, subdir: str, city: str, valid_keys: Set
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--data_root", default="/home/shangying/workspace/dataset/UnifiedBH/overlap15")
+    parser.add_argument("--data_root", default="data/UnifiedBH/overlap15")
     parser.add_argument(
         "--cache_root",
-        default="/home/shangying/workspace/dataset/UnifiedBH/overlap15/disp/sd2h_full9_abs_groundfix_whusside724_20260622",
+        default="data/UnifiedBH/overlap15/disp/sd2h_full9_abs_groundfix_whusside724_20260622",
     )
     parser.add_argument("--cities", nargs="+", default=DEFAULT_CITIES)
     parser.add_argument("--subdirs", nargs="+", default=list(CACHE_PATTERNS))

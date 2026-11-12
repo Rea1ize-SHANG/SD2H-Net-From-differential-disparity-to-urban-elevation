@@ -1641,7 +1641,7 @@ def _load_matching_state_dict(model, checkpoint, accelerator=None, skip_prefixes
     return missing, unexpected, skipped
 
 
-@hydra.main(version_base=None, config_path='config', config_name='train_finetune') 
+@hydra.main(version_base=None, config_path='config', config_name='train_city_stratified_50_50')
 def main(cfg):
     os.environ.setdefault('NCCL_P2P_DISABLE', '1')
     os.environ.setdefault('NCCL_IB_DISABLE', '1')

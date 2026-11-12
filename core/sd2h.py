@@ -13,7 +13,9 @@ import math
 from torch.amp import autocast
 
 import sys
-sys.path.append('/home/shangying/workspace/myrepos/SD2H/Depth-Anything-V2-list3')
+from pathlib import Path
+_PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.append(str(_PROJECT_ROOT / 'Depth-Anything-V2-list3'))
 from depth_anything_v2.dpt import DepthAnythingV2, DepthAnythingV2_decoder
 
 
@@ -289,7 +291,7 @@ class SD2H(nn.Module):
         
         depth_anything = DepthAnythingV2(**mono_model_configs[args.encoder])
         depth_anything_decoder = DepthAnythingV2_decoder(**mono_model_configs[args.encoder])
-        state_dict_dpt = torch.load(f'/home/shangying/workspace/myrepos/SD2H/pretrained/depth_anything_v2_{args.encoder}.pth', map_location='cpu', weights_only=True)
+        state_dict_dpt = torch.load(str(_PROJECT_ROOT / 'pretrained' / f'depth_anything_v2_{args.encoder}.pth'), map_location='cpu', weights_only=True)
         depth_anything.load_state_dict(state_dict_dpt, strict=True)
         depth_anything_decoder.load_state_dict(state_dict_dpt, strict=False)
         self.mono_encoder = depth_anything.pretrained

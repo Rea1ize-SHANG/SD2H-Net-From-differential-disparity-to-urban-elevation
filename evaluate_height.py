@@ -637,7 +637,7 @@ def main(args):
         mask_min_instance_pixels=int(_arg_value(args, 'mask_min_instance_pixels', 0)),
         precomputed_disp_delta_root=_arg_value(args, 'precomputed_disp_delta_root', ''),
         precomputed_disp_subdir=_arg_value(args, 'precomputed_disp_subdir', 'disp_npy'),
-        precomputed_delta_subdir=_arg_value(args, 'precomputed_delta_subdir', 'delta_relu_npy'),
+        precomputed_delta_subdir=_arg_value(args, 'precomputed_delta_subdir', 'delta_abs_npy'),
         precomputed_ground_subdir=_arg_value(args, 'precomputed_ground_subdir', ''),
         return_precomputed_ground=bool(_arg_value(args, 'return_precomputed_ground', False)),
         require_precomputed_disp_delta=bool(_arg_value(args, 'require_precomputed_disp_delta', False)),

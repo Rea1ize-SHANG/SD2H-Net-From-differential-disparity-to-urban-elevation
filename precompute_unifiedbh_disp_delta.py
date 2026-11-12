@@ -17,6 +17,20 @@ from core.utils.utils import InputPadder
 
 
 def _load_sd2h(args):
+    if args.random_initialization:
+        torch.manual_seed(args.random_seed)
+        np.random.seed(args.random_seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(args.random_seed)
+        print(
+            f"[*] Building randomly initialized disparity model: encoder={args.encoder}, "
+            f"shared_backbone={args.shared_backbone}, seed={args.random_seed}"
+        )
+        model = SD2H(args)
+        model.to(args.device)
+        model.eval()
+        return model
+
     ckpt_path = Path(args.restore_ckpt)
     if not ckpt_path.exists():
         raise FileNotFoundError(f"Checkpoint not found: {ckpt_path}")
@@ -767,9 +781,6 @@ def run_precompute(model, loader, args):
     out_dir = Path(args.output_directory)
     raw_dirs = {
         "disp": out_dir / "disp_npy",
-        "delta": out_dir / "delta_relu_npy",
-        "delta_signed": out_dir / "delta_signed_npy",
-        "delta_reverse": out_dir / "delta_reverse_relu_npy",
         "delta_abs": out_dir / "delta_abs_npy",
         "ground": out_dir / "local_ground_npy",
     }
@@ -821,9 +832,6 @@ def run_precompute(model, loader, args):
 
             core_name = _output_core_name(left_path)
             disp_path = raw_dirs["disp"] / logical_city / f"Disp_{core_name}.npy"
-            delta_path = raw_dirs["delta"] / logical_city / f"DeltaDisp_{core_name}.npy"
-            signed_path = raw_dirs["delta_signed"] / logical_city / f"DeltaDispSigned_{core_name}.npy"
-            reverse_path = raw_dirs["delta_reverse"] / logical_city / f"DeltaDispReverse_{core_name}.npy"
             abs_path = raw_dirs["delta_abs"] / logical_city / f"DeltaDispAbs_{core_name}.npy"
             ground_path = raw_dirs["ground"] / logical_city / f"LocalGroundDisp_{core_name}.npy"
             reuse_disp_path = _cached_disp_path(args.reuse_disp_root, logical_city, core_name)
@@ -834,9 +842,6 @@ def run_precompute(model, loader, args):
             already_done = (
                 args.skip_existing
                 and disp_path.exists()
-                and delta_path.exists()
-                and signed_path.exists()
-                and reverse_path.exists()
                 and abs_path.exists()
                 and ground_path.exists()
             )
@@ -848,9 +853,6 @@ def run_precompute(model, loader, args):
                 "logical_city": logical_city,
                 "core_name": core_name,
                 "disp_path": disp_path,
-                "delta_path": delta_path,
-                "signed_path": signed_path,
-                "reverse_path": reverse_path,
                 "abs_path": abs_path,
                 "ground_path": ground_path,
                 "reuse_disp_path": reuse_disp_path,
@@ -888,9 +890,6 @@ def run_precompute(model, loader, args):
             logical_city = meta["logical_city"]
             core_name = meta["core_name"]
             disp_path = meta["disp_path"]
-            delta_path = meta["delta_path"]
-            signed_path = meta["signed_path"]
-            reverse_path = meta["reverse_path"]
             abs_path = meta["abs_path"]
             ground_path = meta["ground_path"]
 
@@ -902,11 +901,12 @@ def run_precompute(model, loader, args):
 
             if meta["already_done"]:
                 disp_np = np.load(disp_path).astype(np.float32)
-                delta_np = np.load(delta_path).astype(np.float32)
-                signed_np = np.load(signed_path).astype(np.float32)
-                reverse_np = np.load(reverse_path).astype(np.float32)
                 abs_np = np.load(abs_path).astype(np.float32)
                 ground_np = np.load(ground_path).astype(np.float32)
+                # Directional products are derived in memory, not stored redundantly.
+                signed_np = np.where(np.isfinite(abs_np), ground_np - disp_np, np.nan)
+                delta_np = np.maximum(signed_np, 0.0)
+                reverse_np = np.maximum(-signed_np, 0.0)
                 skipped += 1
             elif meta["has_reuse_disp"]:
                 disp_np = np.load(meta["reuse_disp_path"]).astype(np.float32)
@@ -935,9 +935,6 @@ def run_precompute(model, loader, args):
             if not meta["already_done"]:
                 for path, arr in [
                     (disp_path, disp_np),
-                    (delta_path, delta_np),
-                    (signed_path, signed_np),
-                    (reverse_path, reverse_np),
                     (abs_path, abs_np),
                     (ground_path, ground_np),
                 ]:
@@ -980,7 +977,6 @@ def run_precompute(model, loader, args):
                     "k": k_value,
                     "disp_npy": str(disp_path),
                     "delta_npy": str(abs_path),
-                    "delta_relu_npy": str(delta_path),
                     "delta_abs_npy": str(abs_path),
                     "ground_npy": str(ground_path),
                 })
@@ -1000,9 +996,6 @@ def run_precompute(model, loader, args):
                 "label_max": float(gt_positive.max()) if gt_positive.size else 0.0,
                 "disp_npy": str(disp_path),
                 "delta_npy": str(abs_path),
-                "delta_relu_npy": str(delta_path),
-                "delta_signed_npy": str(signed_path),
-                "delta_reverse_npy": str(reverse_path),
                 "delta_abs_npy": str(abs_path),
                 "ground_npy": str(ground_path),
             })
@@ -1069,11 +1062,17 @@ def build_argparser():
         description="Recompute SD2H disparity and label-guided differential disparity for UnifiedBH."
     )
     parser.add_argument("--restore_ckpt", default="./checkpoints/pretrain_whusside_60ep_724/final.pth")
-    parser.add_argument("--data_path", default="/home/shangying/workspace/dataset/UnifiedBH/overlap15/")
+    parser.add_argument(
+        "--random_initialization",
+        action="store_true",
+        help="Skip all model checkpoints for the pretraining ablation.",
+    )
+    parser.add_argument("--random_seed", type=int, default=724)
+    parser.add_argument("--data_path", default="data/UnifiedBH/overlap15/")
     parser.add_argument("--cities", nargs="+", default=["HZ_049", "HZ_050", "HZ_057"])
     parser.add_argument("--train_cities", nargs="+", default=["HZ_049", "HZ_050"])
     parser.add_argument("--test_cities", nargs="+", default=["HZ_057"])
-    parser.add_argument("--output_directory", default="/home/shangying/workspace/dataset/UnifiedBH/overlap15/disp/sd2h_recomputed_whusside724")
+    parser.add_argument("--output_directory", default="data/UnifiedBH/overlap15/disp/sd2h_recomputed_whusside724")
     parser.add_argument("--reuse_disp_root", default="", help="Optional cache root containing disp_npy to reuse while recomputing delta maps.")
     parser.add_argument("--reuse_disp_only", action="store_true", help="Do not instantiate SD2H; require --reuse_disp_root for every selected sample.")
     parser.add_argument("--reuse_cached_ground", action="store_true", help="Reuse local_ground_npy from --reuse_disp_root and only repair outlier ground values.")

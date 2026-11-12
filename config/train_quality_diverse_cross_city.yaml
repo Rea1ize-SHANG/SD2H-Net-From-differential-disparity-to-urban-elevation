@@ -17,12 +17,12 @@ val_cities:
 - HK_062
 - PRE_039
 train_dataset_name: unifiedbh
-train_data_path: /home/shangying/workspace/dataset/UnifiedBH/overlap15/
+train_data_path: data/UnifiedBH/overlap15/
 val_dataset_name: unifiedbh
-val_data_path: /home/shangying/workspace/dataset/UnifiedBH/overlap15/
+val_data_path: data/UnifiedBH/overlap15/
 pretrained_disp_path: ''
 height_delta_source: precomputed
-precomputed_disp_delta_root: /home/shangying/workspace/dataset/UnifiedBH/overlap15/disp/sd2h_full9_abs_groundfix_whusside724_20260622
+precomputed_disp_delta_root: data/UnifiedBH/overlap15/disp/sd2h_full9_abs_groundfix_whusside724_20260622
 precomputed_disp_subdir: disp_npy
 precomputed_delta_subdir: delta_abs_npy
 precomputed_ground_subdir: local_ground_npy
